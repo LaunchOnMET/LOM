@@ -1,0 +1,142 @@
+[
+  {
+    "id": "FIRST_STEPS",
+    "title": "First Steps",
+    "description": "Make your first trade on any LOM token.",
+    "type": "trading",
+    "points": 25
+  },
+  {
+    "id": "FIRST_LAUNCH",
+    "title": "The Creator",
+    "description": "Launch your first token on LOM.",
+    "type": "deployment",
+    "points": 50
+  },
+  {
+    "id": "PROFITABLE_START",
+    "title": "Profitable Start",
+    "description": "Complete your first profitable trade.",
+    "type": "trading",
+    "points": 50
+  },
+  {
+    "id": "THE_REGULAR",
+    "title": "The Regular",
+    "description": "Trade on 5 different LOM tokens.",
+    "type": "trading",
+    "points": 75
+  },
+  {
+    "id": "SOCIALITE",
+    "title": "Socialite",
+    "description": "Post your first comment on any token's page.",
+    "type": "social",
+    "points": 25
+  },
+  {
+    "id": "SNIPER",
+    "title": "Sniper",
+    "description": "Buy a token within the first 30 seconds of its launch.",
+    "type": "feat",
+    "points": 100
+  },
+  {
+    "id": "PIONEER_TRADER",
+    "title": "Pioneer Trader",
+    "description": "Be one of the first 10 unique buyers of any new token.",
+    "type": "trading",
+    "points": 150
+  },
+  {
+    "id": "SERIAL_LAUNCHER",
+    "title": "Serial Launcher",
+    "description": "Successfully launch 5 or more tokens on LOM.",
+    "type": "deployment",
+    "points": 150
+  },
+  {
+    "id": "APPRENTICE_TRADER",
+    "title": "Apprentice Trader",
+    "description": "Reach a total trading volume of 10 SOL.",
+    "type": "cumulative",
+    "points": 100
+  },
+  {
+    "id": "FLIPPER",
+    "title": "Flipper",
+    "description": "Successfully complete 10 profitable flips.",
+    "type": "trading",
+    "points": 200
+  },
+  {
+    "id": "HODLER",
+    "title": "HODLer",
+    "description": "Hold a token for over 24 hours before selling it for a profit.",
+    "type": "feat",
+    "points": 250
+  },
+  {
+    "id": "JOURNEYMAN_TRADER",
+    "title": "Journeyman Trader",
+    "description": "Trade a total of 100 SOL in volume across all LOM tokens.",
+    "type": "cumulative",
+    "points": 300
+  },
+  {
+    "id": "SUCCESSFUL_LAUNCH",
+    "title": "Successful Launch",
+    "description": "Launch a token that reaches a market cap of $10,000.",
+    "type": "deployment",
+    "points": 500
+  },
+  {
+    "id": "WHALE_TRADE",
+    "title": "Whale Trade",
+    "description": "Make a single trade of over 25 SOL on a LOM token.",
+    "type": "feat",
+    "points": 500
+  },
+  {
+    "id": "DIAMOND_HANDS",
+    "title": "Diamond Hands",
+    "description": "Hold a token through a 50% price dip from your entry and then sell it for a profit.",
+    "type": "feat",
+    "points": 750
+  },
+  {
+    "id": "MASTER_FLIPPER",
+    "title": "Master Flipper",
+    "description": "Successfully complete 50 profitable flips.",
+    "type": "trading",
+    "points": 750
+  },
+  {
+    "id": "LAUNCHPAD_LEGEND",
+    "title": "Launchpad Legend",
+    "description": "Launch a token that reaches a market cap of $100,000.",
+    "type": "deployment",
+    "points": 1500
+  },
+  {
+    "id": "MARKET_MAKER",
+    "title": "Market Maker",
+    "description": "Reach a total trading volume of 1,000 SOL.",
+    "type": "cumulative",
+    "points": 1000
+  },
+  {
+    "id": "TOP_TEN_TRADER",
+    "title": "Top Ten Trader",
+    "description": "Finish a day in the top 10 of the LOM leaderboard.",
+    "type": "feat",
+    "points": 500
+  },
+  {
+    "id": "UNICORN_HUNTER",
+    "title": "Unicorn Hunter",
+    "description": "Be an early investor (first 50 buyers) in a token that reaches a $100k market cap.",
+    "type": "feat",
+    "points": 2000
+  }
+]
