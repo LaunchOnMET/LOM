@@ -1,6 +1,6 @@
 # Launch On MET 🚀
 
-![Banner](banner.jpg)
+![Banner](banner.jpeg)
 
 A sleek, full-stack Solana token launchpad powered by Meteora's Dynamic Bonding Curve (DBC) SDK. Deploy meme coins, utility tokens, or experimental projects with zero platform fees—earn from trading volume shares! Built for the Solana ecosystem, integrated with Jupiter for real-time data, and featuring gamified quests, leaderboards, and token insights. Join the MET revolution: Launch fast, trade smart, earn big.
 
