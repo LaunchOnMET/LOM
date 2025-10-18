@@ -176,7 +176,7 @@ Why? Keeps DB fresh; auto-unlocks quests like "Sniper" (buy <30s post-launch).
 Links: Jupiter Txs API
 
  Styling & Deployment NotesTheme: Dark glassmorphism (--bg-1: rgba(18,14,16,0.5)), purple accents (--accent: #8b5cf6).
-Deploy: Render (env vars), or Vercel. Add public/banner.png for GitHub.
+Deploy: Render (env vars), or Vercel. Add public/banner.jpeg for GitHub.
 Next? Postgres swap, Redis cache, auth (e.g., Helius webhooks).
 
 Full Credits: Built with  using Solana, Meteora, Jupiter. Fork & star! Last Updated: October 18, 2025
