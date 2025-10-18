@@ -6,7 +6,7 @@
   Zero platform fees, instant launches, gamified rewards, and Jupiter-powered insights. Built for degens who move fast.   
 
   
-  ![GitHub stars](https://img.shields.io/github/stars/yourusername/launch-on-met?logo=github&style=for-the-badge)
+  ![GitHub stars](https://img.shields.io/github/stars/LaunchOnMET/LOM?logo=github&style=for-the-badge)
   ![Solana](https://img.shields.io/badge/Solana-00FFAA?style=for-the-badge&logo=solana&logoColor=white)
   ![Meteora](https://img.shields.io/badge/Meteora-Purple?style=for-the-badge&logo=meteora&logoColor=white)
   ![Jupiter](https://img.shields.io/badge/Jupiter-Orange?style=for-the-badge&logo=jupiter&logoColor=white)  
@@ -30,7 +30,7 @@ Pinata account (free tier OK) for IPFS
 
 Step 1: Clone & Installbash
 
-git clone https://github.com/yourusername/launch-on-met.git
+git clone https://github.com/LaunchOnMET/LOM.git
 cd launch-on-met
 npm install
 
