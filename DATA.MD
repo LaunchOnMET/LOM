@@ -1,5 +1,5 @@
  Launch On MET – Solana's Premier Token Launchpad<div align="center">
-  <img src="banner.png" alt="Launch On MET Banner" width="100%"/>
+  <img src="banner.jpeg" alt="Launch On MET Banner" width="100%"/>
   
   
   Deploy, Trade, and Earn on Meteora's Dynamic Bonding Curve.
