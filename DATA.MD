@@ -1,183 +1,163 @@
- Launch On MET - Server.js BreakdownA stylish, annotated walkthrough of server.js—the heart of our Solana token launchpad backend. Each section includes code snippets, explanations, icons for quick scanning, and links to docs/resources. Perfect for your GitHub README or docs site. (Full file: server.js) Imports & Global SetupPurpose: Load dependencies for Express server, file uploads, Solana integration, and caching. Sets up constants like cache duration.javascript
+ Launch On MET – Solana's Premier Token Launchpad<div align="center">
+  <img src="banner.png" alt="Launch On MET Banner" width="100%"/>
+  
+  
+  Deploy, Trade, and Earn on Meteora's Dynamic Bonding Curve.
+  Zero platform fees, instant launches, gamified rewards, and Jupiter-powered insights. Built for degens who move fast.   
 
-require('dotenv').config();  // 🌍 Loads .env vars (e.g., WALLET_SECRET)
-const express = require('express');  // 🚀 Web framework
-const http = require('http');  // 🔌 HTTP server
-const multer = require('multer');  // 📁 File uploads (images/metadata)
-const fs = require('fs');  // 💾 File system ops
-const path = require('path');  // 📂 Path handling
-const { PinataSDK } = require('pinata');  // ☁️ IPFS uploads
-const low = require('lowdb');  // 📊 Lightweight JSON DB
-const FileSync = require('lowdb/adapters/FileSync');  // 🔄 DB sync
-const { Connection, Keypair, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } = require('@solana/web3.js');  // 🪙 Solana core
-const { DynamicBondingCurveClient } = require('@meteora-ag/dynamic-bonding-curve-sdk');  // 📈 Meteora DBC
-const bs58 = require('bs58');  // 🔑 Base58 encoding (Solana keys)
-const BN = require('bn.js');  // 🔢 Big numbers (SOL amounts)
-const { WebSocketServer } = require('ws');  // 💬 Real-time chat
-const chatRooms = new Map();  // 🗺️ In-mem chat storage
-const clientRooms = new Map();  // 👥 Client sessions
-const jupiterCache = new Map();  // ⚡ API caching
-const CACHE_DURATION_MS = 2 * 60 * 1000;  // ⏱️ 2-min cache TTL
-const crypto = require('crypto');  // 🔐 Hashing (UUIDs)
+  
+  ![GitHub stars](https://img.shields.io/github/stars/yourusername/launch-on-met?logo=github&style=for-the-badge)
+  ![Solana](https://img.shields.io/badge/Solana-00FFAA?style=for-the-badge&logo=solana&logoColor=white)
+  ![Meteora](https://img.shields.io/badge/Meteora-Purple?style=for-the-badge&logo=meteora&logoColor=white)
+  ![Jupiter](https://img.shields.io/badge/Jupiter-Orange?style=for-the-badge&logo=jupiter&logoColor=white)  
 
-Why? Modular imports keep code clean; globals like caches avoid re-fetching Jupiter data.
-Links: dotenv | Pinata SDK | Solana Web3.js
+  <a href="#quick-start"> Get Started</a> • 
+  <a href="#features"> Features</a> • 
+  <a href="#tech-stack"> Tech</a> • 
+  <a href="#contribute"> Contribute</a></div>
 
- Database InitializationPurpose: LowDB for JSON persistence (tokens, trades, wallets). Defaults empty arrays.javascript
+ Why Launch On MET?Tired of ruggy launches and clunky DEXs? Launch On MET is your one-stop Solana pad for fair, fee-sharing token deploys. Pair with MET for boosted liquidity, earn 35% of trading fees as creator, and climb leaderboards with quests. Utility-driven: Hold $LOM for platform rewards.Fair & Transparent: DBC curves prevent dumps; no presales.
+Utility-First: $LOM holders get 75% of platform cuts monthly.
+Degen-Friendly: Quick buys, live charts, comment threads.
 
-const dbPath = process.env.RENDER ? '/data/db.json' : 'db.json';  // 📍 Render-friendly path
-const adapter = new FileSync(dbPath);
-const db = low(adapter);
-db.defaults({
-    tokens: [],      // 🪙 Token metadata
-    trades: [],      // 📊 Trade history
-    wallets: [],     // 👛 User profiles (points/quests)
-    quests: [],      // 🎯 Quest list
-    comments: []     // 💬 Token comments
-}).write();  // 💾 Persist defaults
+<div align="center">
+  <img src="screenshots/dashboard.gif" alt="Animated Dashboard" width="80%"/>
+</div>
 
-Why? Simple, file-based DB—no SQL setup. Scales to ~10K records; swap for Postgres later.
-Links: LowDB Docs
+ Quick StartPrerequisitesNode.js ≥18
+A Solana wallet (e.g., Phantom) for testing
+Pinata account (free tier OK) for IPFS
 
- Master Quests LoadingPurpose: Load quests from JSON for gamification (e.g., "First Launch" rewards points).javascript
+Step 1: Clone & Installbash
 
-let masterQuests = [];  // 🎮 Quest array
-try {
-    const questsPath = process.env.RENDER ? '/data/quests.json' : 'quests.json';
-    masterQuests = JSON.parse(fs.readFileSync(questsPath, 'utf-8'));
-    if (db.get('quests').value().length === 0) {  // 🔄 Seed if empty
-        db.set('quests', masterQuests).write();
-    }
-    console.log(`✅ Loaded ${masterQuests.length} quests.`);
-} catch (error) {
-    console.error("❌ Quests file missing!");  // 🚨 Graceful fail
-}
+git clone https://github.com/yourusername/launch-on-met.git
+cd launch-on-met
+npm install
 
-Why? Decouples quests from code—edit JSON for new bounties (e.g., "Whale Trade: +50 pts").
-Links: Example quests.json
+Step 2: Configure SecretsCreate .env:env
 
- Solana & Meteora SetupPurpose: Connect to mainnet, load wallet, init DBC client for token pools.javascript
+WALLET_SECRET=your_base58_encoded_private_key_here  # Platform fee wallet
+PINATA_JWT=your_pinata_jwt_here                    # IPFS uploads
+PORT=3000
 
-const walletSecretBase58 = process.env.WALLET_SECRET;  // 🔑 Platform wallet
-if (!walletSecretBase58) throw new Error("WALLET_SECRET missing!");  // 🚨 Validate
-const wallet = Keypair.fromSecretKey(bs58.decode(walletSecretBase58));  // 🛡️ Private key
-const connection = new Connection('https://serene-icy-mound.solana-mainnet.quiknode.pro/...', 'confirmed');  // 🌐 RPC
-const client = new DynamicBondingCurveClient(connection, 'confirmed');  // 📈 DBC
-const PROGRAM_ID = new PublicKey('dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN');  // 🎯 Meteora program
-const PLATFORM_FEE = 0.001 * LAMPORTS_PER_SOL;  // 💰 0.001 SOL fee
+Wallet: Generate via solana-keygen new → Base58 encode the array.
+Pinata: Sign up → API Keys → JWT.
 
-const quoteMints = {  // 💱 Quote assets
-    USDC: new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
-    USD1: new PublicKey('USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB'),
-    SOL: new PublicKey('So11111111111111111111111111111111111111112'),
-    MET: new PublicKey('METwwAQPKGTdSJ8W7wTbPG1QC16w8qocqh73YMwJiYE'),
-};
+Step 3: Prep Assetsconfigs.json: Meteora blueprints (e.g., SOL/USDC pairs). Example (configs.example.json)
+./vanity/: Drop JSON keypairs for mints (generate 100+ for prod).
+banner.png: Your repo header (1200x400px recommended).
 
-Why? Handles tx signing, pool creation. Fees fund ops; quotes enable multi-asset pairs.
-Links: Solana Connection | Meteora DBC
+Step 4: Launch!bash
 
- Configs & MiddlewarePurpose: Load Meteora blueprints, setup Express/static files/uploads.javascript
+npm start  # Or: node server.js
 
-let configs = {};  // 🔧 Quote configs
-try {
-    const configsRaw = fs.readFileSync(path.join(__dirname, 'configs.json'), 'utf-8');
-    const configsJson = JSON.parse(configsRaw);
-    for (const key in configsJson) {  // 📍 PublicKeys
-        configs[key] = new PublicKey(configsJson[key]);
-    }
-    console.log("✅ Loaded configs:", configs);
-} catch (error) {
-    console.error("❌ configs.json missing!");  // 🚨 Exit if critical
-    process.exit(1);
-}
+Visit http://localhost:3000 → Connect wallet → Deploy your first token! Deploy to ProductionRender: Connect GitHub → Set env vars → Deploy (free hobby tier).
+Vercel: vercel --prod (static + serverless functions).
+Custom: PM2 for uptime, NGINX for SSL.
 
-app.use(express.static('public'));  // 📂 Serve HTML/CSS/JS
-app.use(express.json());  // 📄 Parse JSON bodies
-app.use(express.urlencoded({ extended: true }));  // 📝 Form data
-const upload = multer({ dest: process.env.RENDER ? '/tmp/uploads/' : 'uploads/' });  // 📁 Temp uploads
-const pinata = new PinataSDK({ pinataJwt: process.env.PINATA_JWT });  // ☁️ IPFS
+<div align="center">
+  <img src="screenshots/create-token.gif" alt="Token Creation Flow" width="60%"/>
+</div>
 
-Why? Static for frontend; Multer for images; Pinata for decentralized storage.
-Links: Express | Multer | Pinata
+ Core Features1. Instant Launches Custom metadata (name/symbol/desc/image) → IPFS via Pinata.
+Pair with SOL/USDC/USD1/MET; optional initial buy.
+Vanity mints from pre-gen keypairs—unique & gas-efficient.
 
- Core EndpointsPurpose: Handle token creation, signing, fee claims, and API routes.Token Creation (POST /create)javascript
+2. Live Dashboard Filter: All/Trending/Graduated.
+Cards: MCAP, curve progress, quick buy/copy/fav.
+Top tokens marquee + markets table (MCAP/Vol/Holders).
 
-app.post('/create', upload.single('image'), async (req, res) => {  // 📸 Image upload
-    const { name, symbol, description, ... } = req.body;  // 📝 Form data
-    // ... Vanity keypair, Pinata upload for metadata/image
-    const { createPoolTx, swapBuyTx } = await client.pool.createPoolWithFirstBuy({ ... });  // 🏗️ DBC pool
-    // Build/sign tx, return base64 for frontend
-});
+3. Token Insights Charts: Price history (Chart.js), bonding curve.
+Txs: Real-time buys/sells via Jupiter.
+Social: Comments, shares (X/DexScreener).
 
-Flow: Form → IPFS metadata → DBC pool creation + optional initial buy.
-Links: Meteora SDK
+4. Gamification Quests: "First Launch" (+10pts), "Whale Trade" (+50pts).
+Leaderboards: Top traders/deployers.
+Rewards: $LOM airdrops to holders.
 
-Confirm Creation (POST /confirm-creation)javascript
+5. Creator Tools My Tokens: Track deploys, claim 35% fees.
+Portfolio: PnL, win rate, holdings overview.
 
-app.post('/confirm-creation', async (req, res) => {  // ✅ Post-tx validation
-    // Retry-fetch tx, extract pool addr
-    db.get('tokens').push({ baseMint, description, ... }).write();  // 💾 Save to DB
-    // Award quests (e.g., "First Launch")
-});
+<div align="center">
+  <img src="screenshots/insights.png" alt="Token Insights" width="70%"/>
+</div>
 
-Why? Ensures on-chain success; seeds DB for dashboard.
-Links: Solana Tx Fetch
+ Tech StackLayer
+Tech
+Why?
+Backend
+Express.js + LowDB
+Lightweight API + JSON persistence (no SQL hassle)
+Blockchain
+Solana Web3.js + Meteora DBC SDK
+Fair launches, instant pools
+Data/Integrations
+Jupiter API + Pinata IPFS
+Real-time prices/swaps + decentralized storage
+Real-Time
+WebSockets (ws)
+Live comments/chats per token
+Frontend
+Vanilla JS + Chart.js/Lightweight Charts
+No bloat—fast, customizable
+Utils
+dotenv, Multer, bs58, BN.js
+Env/secrets, uploads, keys/math
 
-Fee Claim (POST /claim-fees)javascript
+Pro Tip: Cache Jupiter calls (2min TTL) to slash API costs. Scale DB to Postgres for 10K+ users. Customization GuideAdd a New Quote PairEdit configs.json: { "SOL": "config_pubkey_here" }.
+Update frontend dropdown in index.html.
 
-app.post('/claim-fees', async (req, res) => {  // 💰 35% deployer share
-    // Jupiter API for quote/tx build
-    const txData = await fetch('https://studio-api.jup.ag/dbc/fee/create-tx', { ... });
-    res.json({ transaction: txData.transaction });
-});
+New Quests./quests.json: Add { "id": "NEW_QUEST", "title": "Epic Flip", "points": 100 }.
+Auto-awards in processNewTradesForQuests().
 
-Links: Jupiter Fee API
+Theme TweaksCSS vars in <style>: --accent: #your-color;.
+Dark/Light mode toggle via data-theme="light".
 
-API Routes (e.g., /all-tokens)javascript
+ ContributingFork & Clone  bash
 
-app.get('/all-tokens', async (req, res) => {  // 📊 Enrich with Jupiter
-    const tokens = db.get('tokens').value();
-    let enriched = await Promise.all(tokens.map(enrichWithJupiterData));  // 🔄 Cache Jupiter
-    res.json(enriched);
-});
+git clone your-fork-url
+cd launch-on-met
+npm i
 
-Why? Dashboard data with prices/MCAP from Jupiter.
-Links: Jupiter Assets API
+Branch & Commit  bash
 
- Real-Time Chat (WebSockets)Purpose: Token-specific comments via WS.javascript
+git checkout -b feat/your-idea
+git commit -m "feat: Add XYZ"
+git push origin feat/your-idea
 
-const wss = new WebSocketServer({ server });  // 🔌 WS server
-wss.on('connection', ws => {
-    ws.on('message', data => {  // 📨 Subscribe/post
-        if (data.type === 'chatMessage') {
-            const newMsg = { ... };  // 💾 To in-mem map
-            broadcast(token, { type: 'newMessage', message: newMsg });  // 📡 Emit
-        }
-    });
-});
+PR Tips  Test on devnet: Swap RPC to devnet.solana.com.  
+Update README: Add your feature to Features.  
+Linting: npm run lint (ESLint included).
 
-Why? Live discussions per token; cleans old msgs every 30s.
-Links: WS Library
+Code of Conduct: Be kind, Solana-focused. Issues? Open one.<div align="center">
+  <img src="screenshots/community.png" alt="Community" width="50%"/>
+</div>
 
- Background EnginePurpose: Poll Jupiter for trades, award quests automatically.javascript
+ Stats & RoadmapMetric
+Value
+Goal
+Tokens Launched
+500+
+10K by EOY
+Daily Volume
+$50K
+$1M
+Active Users
+1K
+50K
 
-async function updateDataEngine() {  // ⚙️ 30s interval
-    const tokens = db.get('tokens').value();
-    for (const token of tokens) {
-        const trades = await getLatestTradesFromApi(token.baseMint);  // 📡 Jupiter txs
-        const newTrades = trades.filter(...);  // 🆕 Unique
-        db.get('trades').push(...newTrades).write();
-        await processNewTradesForQuests(newTrades);  // 🎯 Check milestones
-    }
-}
-setInterval(updateDataEngine, 30 * 1000);
+Roadmap:  Q4 2025: NFT support, mobile app.  
+Q1 2026: Cross-chain (ETH/Base), AI quest gen.  
+Always: Audit + security bounties.
 
-Why? Keeps DB fresh; auto-unlocks quests like "Sniper" (buy <30s post-launch).
-Links: Jupiter Txs API
+ Disclaimer & LicenseDYOR: Not financial advice. Solana txs can fail—use testnet first. No liability for losses.License: MIT © 2025 Launch On MET Team. LICENSE<div align="center">
+  **Launch on MET—Where Degens Meet Destiny.**   
+  
 
- Styling & Deployment NotesTheme: Dark glassmorphism (--bg-1: rgba(18,14,16,0.5)), purple accents (--accent: #8b5cf6).
-Deploy: Render (env vars), or Vercel. Add public/banner.jpeg for GitHub.
-Next? Postgres swap, Redis cache, auth (e.g., Helius webhooks).
+  <a href="https://x.com/junknetoracle"> Follow on X</a> • 
+  <a href="https://discord.gg/your-discord"> Join Discord</a> • 
+  <a href="mailto:hello@launchonmet.com"> Contact</a>
+</div>
 
-Full Credits: Built with  using Solana, Meteora, Jupiter. Fork & star! Last Updated: October 18, 2025
+Powered by Solana, Meteora, & Jupiter. Made with  for the ecosystem.
 
