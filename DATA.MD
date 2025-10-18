@@ -154,9 +154,7 @@ Always: Audit + security bounties.
   **Launch on MET—Where Degens Meet Destiny.**   
   
 
-  <a href="https://x.com/junknetoracle"> Follow on X</a> • 
-  <a href="https://discord.gg/your-discord"> Join Discord</a> • 
-  <a href="mailto:hello@launchonmet.com"> Contact</a>
+  <a href="https://x.com/LaunchonMet"> Follow on X</a> • 
 </div>
 
 Powered by Solana, Meteora, & Jupiter. Made with  for the ecosystem.
